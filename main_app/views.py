@@ -1,23 +1,23 @@
 from django.shortcuts import render
-
+from .models import Cat
 from django.http import HttpResponse
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 # Create your views here.
 
-class Cat:
-    def __init__(self, name, breed, description, age):
-        self.name = name
-        self.breed = breed
-        self.description = description
-        self.age = age
+class CatCreate(CreateView):
+    model = Cat
+    fields = '__all__'
+    success_url = '/cats/'
+    
+class CatUpdate(UpdateView):
+    model = Cat
+    # Let's disallow the renaming of a cat by excluding the name field!
+    fields = ['breed', 'description', 'age']
 
-# Create a list of Cat instances
-cats = [
-    Cat('Lolo', 'tabby', 'Kinda rude.', 3),
-    Cat('Sachi', 'tortoiseshell', 'Looks like a turtle.', 0),
-    Cat('Fancy', 'bombay', 'Happy fluff ball.', 4),
-    Cat('Bonk', 'selkirk rex', 'Meows loudly.', 6)
-]
-
+class CatDelete(DeleteView):
+    model = Cat
+    success_url = '/cats/'
+    
 
 def home(request):
     return render(request, 'home.html')
@@ -26,4 +26,11 @@ def about(request):
     return render(request, 'about.html')
 
 def cats_index(request):
+    #search psql all cats
+    cats = Cat.objects.all()
     return render(request, 'cats/index.html', {'cats': cats})
+
+
+def cats_detail(request, cat_id):
+    cats = Cat.objects.get(id=cat_id)
+    return render(request, 'cats/detail.html', {'cat': cats})
